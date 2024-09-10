@@ -81,7 +81,7 @@
 export default {
   data() {
     return {
-      imageId: "", // ID de l'image à rechercher
+      imageId: this.$route.params.id || "", // ID de l'image à rechercher (initialisé depuis l'URL si présent)
       image: null, // Détails de l'image récupérée
       newGemCount: 0, // Nouveau nombre de gems à mettre à jour
       loading: false, // Indicateur de chargement
@@ -104,6 +104,7 @@ export default {
         if (response.ok) {
           this.image = data;
           this.newGemCount = data.gem; // Mettre à jour le nombre de gems dans l'input
+          this.$router.push(`/validation/${this.imageId}`); // Mettre à jour l'URL avec l'ID de l'image
         } else {
           this.image = null;
           alert("Image non trouvée.");
@@ -189,6 +190,12 @@ export default {
         this.loading = false; // Désactiver l'indicateur de chargement
       }
     },
+  },
+  created() {
+    // Si un ID est présent dans l'URL, récupérer automatiquement l'image
+    if (this.imageId) {
+      this.fetchImageById();
+    }
   },
 };
 </script>
