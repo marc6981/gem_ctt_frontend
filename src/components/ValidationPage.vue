@@ -78,6 +78,8 @@
 </template>
 
 <script>
+import api from "../api";
+
 export default {
   data() {
     return {
@@ -94,99 +96,70 @@ export default {
         return;
       }
 
-      this.loading = true; // Activer l'indicateur de chargement
+      this.loading = true;
       try {
-        const response = await fetch(
-          `http://localhost:5016/images/${this.imageId}?includeImageBase64=true`
-        );
-        const data = await response.json();
-
-        if (response.ok) {
-          this.image = data;
-          this.newGemCount = data.gem; // Mettre à jour le nombre de gems dans l'input
-        } else {
-          this.image = null;
-          alert("Image non trouvée.");
-        }
+        const response = await api.get(`/images/${this.imageId}`, {
+          params: { includeImageBase64: true },
+        });
+        this.image = response.data;
+        this.newGemCount = this.image.gem;
       } catch (error) {
-        console.error("Erreur lors de la récupération de l'image:", error);
+        console.error("Erreur lors de la récupération de l'image :", error);
+        this.image = null;
+        alert("Image non trouvée.");
       } finally {
-        this.loading = false; // Désactiver l'indicateur de chargement
+        this.loading = false;
       }
     },
 
-    // Fonction pour obtenir une image aléatoire non validée
     async fetchRandomImageToValidate() {
-      this.loading = true; // Activer l'indicateur de chargement
+      this.loading = true;
       try {
-        const response = await fetch(
-          `http://localhost:5016/images/validate?includeImageBase64=true`
-        );
-        const data = await response.json();
-
-        if (response.ok) {
-          this.image = data;
-          this.newGemCount = data.gem; // Mettre à jour le nombre de gems dans l'input
-        } else {
-          this.image = null;
-        }
+        const response = await api.get("/images/validate", {
+          params: { includeImageBase64: true },
+        });
+        this.image = response.data;
+        this.newGemCount = this.image.gem;
       } catch (error) {
         console.error(
-          "Erreur lors de la récupération de l'image à valider:",
+          "Erreur lors de la récupération de l'image à valider :",
           error
         );
+        this.image = null;
       } finally {
-        this.loading = false; // Désactiver l'indicateur de chargement
+        this.loading = false;
       }
     },
 
-    // Fonction pour mettre à jour le nombre de gems
     async updateGems() {
       if (!this.newGemCount || this.newGemCount < 0) {
         return;
       }
 
-      this.loading = true; // Activer l'indicateur de chargement
+      this.loading = true;
       try {
-        const response = await fetch(
-          `http://localhost:5016/images/${this.image._id}/update`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ gem: this.newGemCount }),
-          }
-        );
-
-        if (response.ok) {
-          this.fetchImageById(); // Recharger les informations de l'image sans imageBase64
-        }
+        await api.post(`/images/${this.image._id}/update`, {
+          gem: this.newGemCount,
+        });
+        // Rafraîchir les informations de l'image
+        await this.fetchImageById();
       } catch (error) {
-        console.error("Erreur lors de la mise à jour des gems:", error);
+        console.error("Erreur lors de la mise à jour des gems :", error);
       } finally {
-        this.loading = false; // Désactiver l'indicateur de chargement
+        this.loading = false;
       }
     },
 
-    // Fonction pour valider l'image
     async validateImage() {
-      this.loading = true; // Activer l'indicateur de chargement
+      this.loading = true;
       try {
-        const response = await fetch(
-          `http://localhost:5016/images/${this.image._id}/validate`,
-          {
-            method: "POST",
-          }
-        );
-
-        if (response.ok) {
-          this.fetchRandomImageToValidate(); // Obtenir une nouvelle image aléatoire après validation
-        }
+        await api.post(`/images/${this.image._id}/validate`);
+        // Obtenir une nouvelle image à valider
+        await this.fetchRandomImageToValidate();
       } catch (error) {
-        console.error("Erreur lors de la validation de l'image:", error);
+        console.error("Erreur lors de la validation de l'image :", error);
       } finally {
-        this.loading = false; // Désactiver l'indicateur de chargement
+        this.loading = false;
       }
     },
   },
