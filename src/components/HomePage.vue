@@ -3,18 +3,7 @@
     <h1>Uploader des Images</h1>
 
     <div class="form-group">
-      <label for="created_by">Created By:</label>
-      <input
-        type="text"
-        id="created_by"
-        v-model="created_by"
-        placeholder="Entrez le nom du créateur"
-        class="input-field"
-      />
-    </div>
-
-    <div class="form-group">
-      <label for="images">Sélectionner une ou plusieurs images:</label>
+      <label for="images">Sélectionner une ou plusieurs images :</label>
       <input
         type="file"
         id="images"
@@ -35,18 +24,17 @@
 
     <h1>Liste des Images</h1>
 
-    <button @click="fetchImages" class="btn secondary">Get Images</button>
+    <button @click="fetchImages" class="btn secondary">
+      Rafraîchir la liste
+    </button>
 
     <table v-if="images.length > 0" class="styled-table">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Filename</th>
+          <th>Nom du Fichier</th>
           <th>Gems</th>
-          <th>Created By</th>
-          <th>Created At</th>
-          <th>Validé</th>
-          <th>Action</th>
+          <th>Créé Par</th>
+          <th>Date de Création</th>
         </tr>
       </thead>
       <tbody>
@@ -70,11 +58,13 @@
         </tr>
       </tbody>
     </table>
-    <p v-else>No images found.</p>
+    <p v-else>Aucune image trouvée.</p>
   </div>
 </template>
 
 <script>
+import api from "../api";
+
 export default {
   data() {
     return {
@@ -104,30 +94,28 @@ export default {
         formData.append("images", this.selectedImages[i]);
       }
 
-      formData.append("created_by", this.created_by);
-
       try {
-        const response = await fetch("http://localhost:5016/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (response.ok) {
+        const response = await api.post("/images/upload", formData);
+        if (response.status === 201) {
           this.uploadMessage = "Images uploadées avec succès !";
+          this.selectedImages = [];
+          this.fetchImages(); // Rafraîchir la liste des images
         } else {
-          this.uploadMessage = "Erreur lors de l'upload des images.";
+          this.uploadMessage =
+            response.data.error || "Erreur lors de l'upload des images.";
         }
       } catch (error) {
         this.uploadMessage = "Une erreur s'est produite.";
+        console.error(error);
       }
     },
+
     async fetchImages() {
       try {
-        const response = await fetch("http://localhost:5016/images");
-        const data = await response.json();
-        this.images = data;
+        const response = await api.get("/images");
+        this.images = response.data;
       } catch (error) {
-        console.error("Error fetching images:", error);
+        console.error("Erreur lors de la récupération des images :", error);
       }
     },
     goToValidation(imageId) {
