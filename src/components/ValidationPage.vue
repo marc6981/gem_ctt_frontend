@@ -83,7 +83,7 @@ import api from "../api";
 export default {
   data() {
     return {
-      imageId: "", // ID de l'image à rechercher
+      imageId: this.$route.params.id || "", // ID de l'image à rechercher (initialisé depuis l'URL si présent)
       image: null, // Détails de l'image récupérée
       newGemCount: 0, // Nouveau nombre de gems à mettre à jour
       loading: false, // Indicateur de chargement
@@ -162,6 +162,12 @@ export default {
         this.loading = false;
       }
     },
+  },
+  created() {
+    // Si un ID est présent dans l'URL, récupérer automatiquement l'image
+    if (this.imageId) {
+      this.fetchImageById();
+    }
   },
 };
 </script>

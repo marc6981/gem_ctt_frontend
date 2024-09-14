@@ -21,6 +21,12 @@ const routes = [
     name: "Login",
     component: LoginPage,
   },
+  {
+    path: "/validation/:id", // Route dynamique avec un paramètre d'ID
+    name: "ValidationWithId",
+    component: ValidationPage,
+    props: true, // Permet de passer l'ID comme prop au composant
+  },
 ];
 
 const router = createRouter({

@@ -39,10 +39,22 @@
       </thead>
       <tbody>
         <tr v-for="image in sortedImages" :key="image._id">
+          <td>{{ image._id }}</td>
           <td>{{ image.filename }}</td>
           <td>{{ image.gem }}</td>
           <td>{{ image.created_by || "N/A" }}</td>
           <td>{{ new Date(image.created_at).toLocaleString() }}</td>
+          <td>
+            <!-- Vérifier si l'image est validée -->
+            <span v-if="image.validation">Oui</span>
+            <span v-else>Non</span>
+          </td>
+          <td>
+            <!-- Bouton pour rediriger vers la page de validation de l'image -->
+            <button @click="goToValidation(image._id)" class="btn primary">
+              Valider
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -105,6 +117,10 @@ export default {
       } catch (error) {
         console.error("Erreur lors de la récupération des images :", error);
       }
+    },
+    goToValidation(imageId) {
+      // Redirection vers la route de validation avec l'ID de l'image
+      this.$router.push(`/validation/${imageId}`);
     },
   },
 };
